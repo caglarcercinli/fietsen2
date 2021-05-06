@@ -128,4 +128,11 @@ public class JpaDocentRepositoryTest extends AbstractTransactionalJUnit4SpringCo
                 .extracting(AantalDocentenPerWedde::getAantal)
                 .isEqualTo((long) super.countRowsInTableWhere(DOCENTEN, "wedde = 1000"));
     }
+    @Test
+    void algemeneOpslag() {
+        assertThat(repository.algemeneOpslag(BigDecimal.TEN))
+                .isEqualTo(countRowsInTable(DOCENTEN));
+        assertThat(countRowsInTableWhere(DOCENTEN,
+                "wedde = 1100 and id = " + idVanTestMan())).isOne();
+    }
 }
