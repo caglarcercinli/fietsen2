@@ -2,6 +2,7 @@ package be.vdab.fietsen2.repositories;
 
 import be.vdab.fietsen2.domain.Adres;
 import be.vdab.fietsen2.domain.Campus;
+import be.vdab.fietsen2.domain.TelefoonNr;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -30,18 +31,29 @@ public class JpaCampusRepositoryTest extends AbstractTransactionalJUnit4SpringCo
     void findById() {
         assertThat(repository.findById(idVanTestCampus()))
                 .hasValueSatisfying(campus -> {
-            assertThat(campus.getNaam()).isEqualTo("test");
-            assertThat(campus.getAdres().getGemeente()).isEqualTo("test");
-        });
+                    assertThat(campus.getNaam()).isEqualTo("test");
+                    assertThat(campus.getAdres().getGemeente()).isEqualTo("test");
+                });
     }
+
     @Test
     void findByOnbestaandeId() {
         assertThat(repository.findById(-1)).isNotPresent();
     }
+
     @Test
     void create() {
         var campus = new Campus("test", new Adres("test", "test", "test", "test"));
-        repository.create(campus); assertThat(countRowsInTableWhere(CAMPUSSEN,
+        repository.create(campus);
+        assertThat(countRowsInTableWhere(CAMPUSSEN,
                 "id =" + campus.getId())).isOne();
+    }
+
+    @Test
+    void telefoonNrsLezen() {
+        assertThat(repository.findById(idVanTestCampus()))
+                .hasValueSatisfying(campus ->
+                        assertThat(campus.getTelefoonNrs())
+                                .containsOnly(new TelefoonNr("1", false, "test")));
     }
 }
