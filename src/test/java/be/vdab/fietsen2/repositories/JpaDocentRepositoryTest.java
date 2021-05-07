@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class JpaDocentRepositoryTest extends AbstractTransactionalJUnit4SpringContextTests {
     private final JpaDocentRepository repository;
     private static final String DOCENTEN = "docenten";
+    private static final String DOCENTEN_BIJNAMEN = "docentenbijnamen";
     private Docent docent;
     private final EntityManager manager;
 
@@ -128,11 +129,28 @@ public class JpaDocentRepositoryTest extends AbstractTransactionalJUnit4SpringCo
                 .extracting(AantalDocentenPerWedde::getAantal)
                 .isEqualTo((long) super.countRowsInTableWhere(DOCENTEN, "wedde = 1000"));
     }
+
     @Test
     void algemeneOpslag() {
         assertThat(repository.algemeneOpslag(BigDecimal.TEN))
                 .isEqualTo(countRowsInTable(DOCENTEN));
         assertThat(countRowsInTableWhere(DOCENTEN,
                 "wedde = 1100 and id = " + idVanTestMan())).isOne();
+    }
+
+    @Test
+    void bijnamenLezen() {
+        assertThat(repository.findById(idVanTestMan()))
+                .hasValueSatisfying(docent ->
+                        assertThat(docent.getBijnamen()).containsOnly("test"));
+    }
+
+    @Test
+    void bijnaamToevoegen() {
+        repository.create(docent);
+        docent.addBijnaam("test");
+        manager.flush();
+        assertThat(countRowsInTableWhere(DOCENTEN_BIJNAMEN,
+                "bijnaam = 'test' and docentId = " + docent.getId())).isOne();
     }
 }
