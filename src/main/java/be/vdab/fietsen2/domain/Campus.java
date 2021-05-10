@@ -1,9 +1,7 @@
 package be.vdab.fietsen2.domain;
 
 import javax.persistence.*;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "campussen")
@@ -23,6 +21,19 @@ public class Campus {
     @JoinColumn(name = "campusId")
     @OrderBy("voornaam, familienaam")
     private Set<Docent> docenten;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Campus)) return false;
+        Campus campus = (Campus) o;
+        return Objects.equals(naam.toUpperCase(), campus.naam.toUpperCase());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(naam.toUpperCase());
+    }
 
     public Campus(String naam, Adres adres) {
         this.naam = naam;

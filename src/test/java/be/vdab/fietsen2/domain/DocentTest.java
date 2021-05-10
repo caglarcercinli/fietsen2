@@ -15,7 +15,7 @@ public class DocentTest {
 
     @BeforeEach
     void beforeEach() {
-        //campus1 = new Campus("test", new Adres("test", "test", "test", "test"));
+        campus1 = new Campus("test", new Adres("test", "test", "test", "test"));
         docent1 = new Docent("test", "test", WEDDE, "test@test.be", Geslacht.MAN);
         docent2 = new Docent("test2", "test2", WEDDE, "test2@test.be", Geslacht.MAN);
     }
