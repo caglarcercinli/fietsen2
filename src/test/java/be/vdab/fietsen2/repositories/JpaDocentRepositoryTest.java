@@ -1,9 +1,6 @@
 package be.vdab.fietsen2.repositories;
 
-import be.vdab.fietsen2.domain.Adres;
-import be.vdab.fietsen2.domain.Campus;
-import be.vdab.fietsen2.domain.Docent;
-import be.vdab.fietsen2.domain.Geslacht;
+import be.vdab.fietsen2.domain.*;
 import be.vdab.fietsen2.projections.AantalDocentenPerWedde;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +15,7 @@ import java.math.BigDecimal;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest(showSql = false)
-@Sql({"/insertCampus.sql", "/insertDocent.sql"})
+@Sql({"/insertCampus.sql", "/insertVerantwoordelijkheid.sql", "/insertDocent.sql", "/insertDocentVerantwoordelijkheid.sql"})
 @Import(JpaDocentRepository.class)
 public class JpaDocentRepositoryTest extends AbstractTransactionalJUnit4SpringContextTests {
     private final JpaDocentRepository repository;
@@ -27,12 +24,13 @@ public class JpaDocentRepositoryTest extends AbstractTransactionalJUnit4SpringCo
     private Docent docent;
     private final EntityManager manager;
     private Campus campus;
+    private static final String DOCENTEN_VERANTWOORDELIJKHEDEN = "docentenverantwoordelijkheden";
 
     @BeforeEach
     void beforeEach() {
         campus = new Campus("test", new Adres("test", "test", "test", "test"));
-        docent = new Docent("test", "test", BigDecimal.TEN, "test@test.be", Geslacht.MAN,campus);
-       // campus.add(docent);
+        docent = new Docent("test", "test", BigDecimal.TEN, "test@test.be", Geslacht.MAN, campus);
+        // campus.add(docent);
     }
 
 
@@ -168,8 +166,27 @@ public class JpaDocentRepositoryTest extends AbstractTransactionalJUnit4SpringCo
     @Test
     void campusLazyLoaded() {
         assertThat(repository.findById(idVanTestMan()))
-                .hasValueSatisfying( docent ->
+                .hasValueSatisfying(docent ->
                         assertThat(docent.getCampus().getNaam()).isEqualTo("test"));
     }
 
+    @Test
+    void verantwoordelijkhedenLezen() {
+        assertThat(repository.findById(idVanTestMan()))
+                .hasValueSatisfying(
+                        docent -> assertThat(docent.getVerantwoordelijkheden())
+                                .containsOnly(new Verantwoordelijkheid("test")));
+    }
+
+    @Test
+    void verantwoordelijkheidToevoegen() {
+        var verantwoordelijkheid = new Verantwoordelijkheid("test2");
+        manager.persist(verantwoordelijkheid);
+        manager.persist(campus);
+        repository.create(docent);
+        docent.add(verantwoordelijkheid);
+        manager.flush();
+        assertThat(countRowsInTableWhere(DOCENTEN_VERANTWOORDELIJKHEDEN,
+                "docentId = " + docent.getId() + " and verantwoordelijkheidId = " + verantwoordelijkheid.getId())).isOne();
+    }
 }
