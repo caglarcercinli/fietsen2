@@ -3,12 +3,15 @@ package be.vdab.fietsen2.domain;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "docenten")
+@NamedEntityGraph(name = "Docent.metCampus",
+attributeNodes = @NamedAttributeNode("campus"))
 public class Docent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +32,8 @@ public class Docent {
     private Campus campus;
     @ManyToMany(mappedBy = "docenten")
     private Set<Verantwoordelijkheid> verantwoordelijkheden = new LinkedHashSet<>();
+    @Version
+    private Timestamp versie;
 
 
     public Docent(String voornaam, String familienaam, BigDecimal wedde, String emailAdres, Geslacht geslacht, Campus campus) {
